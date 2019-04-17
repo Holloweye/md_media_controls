@@ -46,7 +46,7 @@ public class SwiftMdMediaControlsPlugin: NSObject, FlutterPlugin {
         
         if #available(iOS 9.1, *) {
             UIApplication.shared.beginReceivingRemoteControlEvents();
-            player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, 1), queue: nil) {
+            player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: nil) {
                 time in
                 if let tt = playerItem {
                     let currentTime = tt.currentTime().seconds;
@@ -60,7 +60,7 @@ public class SwiftMdMediaControlsPlugin: NSObject, FlutterPlugin {
                 if let event = remoteEvent as? MPChangePlaybackPositionCommandEvent {
                     mediaInfoData[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Double(event.positionTime);
                     MPNowPlayingInfoCenter.default().nowPlayingInfo = mediaInfoData;
-                    player.seek(to: CMTimeMake(Int64(event.positionTime), 1));
+                    player.seek(to: CMTimeMake(value: Int64(event.positionTime), timescale: 1));
                     return .success;
                 }
                 return .commandFailed;
@@ -124,7 +124,7 @@ public class SwiftMdMediaControlsPlugin: NSObject, FlutterPlugin {
             self.channel.invokeMethod("audio.duration", arguments: playerItem?.duration.seconds)
             
             do {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: []);
+                try AVAudioSession.sharedInstance().setCategory(.playback, options: [])
                 try AVAudioSession.sharedInstance().setActive(true);
                 self.channel.invokeMethod("audio.play", arguments: nil);
             } catch let error {
@@ -148,7 +148,7 @@ public class SwiftMdMediaControlsPlugin: NSObject, FlutterPlugin {
             let position = args.object(forKey: "position") as! Double;
             
             if let tt = playerItem {
-                tt.seek(to: CMTimeMakeWithSeconds(position, 60000));
+                tt.seek(to: CMTimeMakeWithSeconds(position, preferredTimescale: 60000));
             }
             if (player.rate == 0.0) {
                 if #available(iOS 10.0, *) {
