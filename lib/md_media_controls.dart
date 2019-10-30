@@ -65,10 +65,9 @@ class MdMediaControls {
         break;
       case 'audio.duration':
         _duration = Duration(seconds: call.arguments);
-        _positionController.add(Duration(seconds: 0));
         break;
       case 'audio.position':
-        _positionController.add(Duration(seconds: call.arguments));
+        _positionController.add(Duration(milliseconds: call.arguments));
         break;
       case 'audio.play':
         _playerStateController.add(ControlsState.PLAYING);
@@ -104,22 +103,31 @@ class MdMediaControls {
     }
   }
 
-  Future<void> playNew({@required String url, rate = 0.0}) async =>
+  Future<void> playNew({@required String url, double rate = 1.0, double startPosition = 0.0, bool autoPlay = true}) async =>
       await _CHANNEL.invokeMethod('play', {
+        'url': url,
+        'isLocal': !_protocols.contains(url.split('://').first),
+        'rate': rate ?? 1.0,
+        'startPosition': startPosition ?? 0.0,
+        'autoPlay': autoPlay
+      });
+
+  Future<void> playUncontrolled({@required String url, rate = 1.0}) async =>
+      await _CHANNEL.invokeMethod('playUncontrolled', {
         'url': url,
         'isLocal': !_protocols.contains(url.split('://').first),
         'rate': rate
       });
 
-  Future<void> play({@required String url}) async =>
+  Future<void> play() async =>
       await _CHANNEL.invokeMethod('playPrev');
 
   Future<void> pause() async => await _CHANNEL.invokeMethod('pause');
 
   Future<void> stop() async => await _CHANNEL.invokeMethod('stop');
 
-  Future<void> seek(double seconds) async =>
-      await _CHANNEL.invokeMethod('seek', {'position': seconds});
+  Future<void> seek(double seconds, {bool play = true}) async =>
+      await _CHANNEL.invokeMethod('seek', {'position': seconds, 'play': play});
 
   Future<void> rate({double rate = 0.0}) async =>
       await _CHANNEL.invokeMethod('rate', {'rate': rate});
@@ -130,7 +138,7 @@ class MdMediaControls {
     @required String imageUrl,
   }) async {
     var isLocal = true;
-    if (_protocols.contains(imageUrl.split('://').first)) {
+    if (imageUrl != null && _protocols.contains(imageUrl.split('://').first)) {
       isLocal = false;
     }
     return await _CHANNEL.invokeMethod('info', {
@@ -145,12 +153,14 @@ class MdMediaControls {
     bool pause = true,
     bool play = true,
     bool prev = true,
-    bool next = true
+    bool next = true,
+    bool position = true
   }) async => await _CHANNEL.invokeMethod('infoControls', {
     'pause': pause,
     'play': play,
     'prev': prev,
-    'next': next
+    'next': next,
+    'position': position
   });
 
   Future<void> clearInfo() async => await _CHANNEL.invokeMethod('clearInfo');
