@@ -1,18 +1,17 @@
 name: md_media_controls
 description: A new flutter plugin project.
-version: 0.0.78
-author: Igor Baranov<i.baranov@mobidev.biz>
+version: 0.0.99
 homepage: https://github.com/IgorBaranov/md_media_controls
 publish_to: https://pub.dartlang.org/
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.0.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  path_provider: ^0.5.0+1
+  path_provider: ^1.6.0
   meta: ^1.1.6
 
 # For information on the generic Dart part of this file, see the
